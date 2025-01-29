@@ -79,3 +79,5 @@ async def retrieve_parameters():
     df_final = pd.read_csv(os.path.join('../dataset','Final_Cleaned_Occupancy_Estimation.csv'),index_col=0)
     prediction = RF.predict(df_final)
     log.info(f"Prediction: {prediction}")
+    prediction_list = prediction.tolist()
+    return {"prediction": prediction_list}
