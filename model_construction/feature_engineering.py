@@ -8,7 +8,7 @@ WINDOW_SIZE = 25
 # Load the data
 df = pd.read_csv(os.path.join('../dataset','Occupancy_Estimation_discretization.csv'),index_col=0)
 # add new column
-df['CO2_Slope'] = np.nan
+df['S5_CO2_Slope'] = np.nan
 
 # Sort the data
 df.sort_values(by=['Date','Time'])
@@ -22,7 +22,7 @@ for group in grouped:
         # check if we have enough data points
         if i < WINDOW_SIZE:
             # set 0 as slope
-            df.loc[current_group.index[i], 'CO2_Slope'] = 0
+            df.loc[current_group.index[i], 'S5_CO2_Slope'] = 0
             continue
 
         y = current_group['S5_CO2'].iloc[i-WINDOW_SIZE:i].values
@@ -32,12 +32,12 @@ for group in grouped:
         # Linear regression
         reg = LinearRegression().fit(x, y)
         slope = reg.coef_[0]
-        df.loc[current_group.index[i], 'CO2_Slope'] = slope
+        df.loc[current_group.index[i], 'S5_CO2_Slope'] = slope
 
 # Move 'CO2_Slope' next to 'S5_CO2'
 cols = list(df.columns)
 s5_co2_index = cols.index('S5_CO2')
-cols.insert(s5_co2_index + 1, cols.pop(cols.index('CO2_Slope')))
+cols.insert(s5_co2_index + 1, cols.pop(cols.index('S5_CO2_Slope')))
 df = df[cols]
 
 # # Save the data 
