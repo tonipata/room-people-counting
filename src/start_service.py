@@ -1,9 +1,5 @@
 from fastapi import APIRouter, status
 import joblib
-from preprocessing.cleaning import apply_min_max
-from preprocessing.data_discretization import create_category_time
-from preprocessing.feature_engineering import apply_feature_engineering
-from preprocessing.final_cleaning import apply_final_cleaning
 from schemas import SensorData
 from log import get_log
 from utils import *
@@ -19,7 +15,7 @@ buffer: List[SensorData] = []
 SENSOR_NUMBER = 15
 WINDOW_SIZE = 25
 # load the model
-RF = joblib.load('../classification/RF.pkl')
+RF = joblib.load('classification/RF_pipeline.pkl')
 # initialize the dataframe
 df_sensor = pd.read_csv(os.path.join('../dataset','Sensor_Occupancy_Estimation.csv'), index_col=0)
 
@@ -47,37 +43,9 @@ async def retrieve_parameters():
     log.info("Cleaning buffer")
     buffer.clear()
     log.info("Apply cleaning and normalization")
-    apply_min_max(df_in)
-    # retrieve new row
-    row_in = df_in.iloc[[0]]
-    log.info(f"Row in: {row_in}")
-    log.info("Normalization completed")
-    # adding to feature engineering dataset
-    df_feature_engineering = pd.read_csv(os.path.join('../dataset','Feature_Engineering_Occupancy_Estimation.csv'), index_col=0)
-    df_feature_engineering = pd.concat([df_feature_engineering, row_in], ignore_index=True)
-    # Check dimension and remove first row
-    if len(df_feature_engineering) > WINDOW_SIZE:
-        log.info("Removing first row")
-        df_feature_engineering = df_feature_engineering.iloc[1:].reset_index(drop=True)
     
-    # save the dataframe
-    df_feature_engineering.to_csv(os.path.join('../dataset','Feature_Engineering_Occupancy_Estimation.csv'))
-    # dataframe with all features
-    df_full = pd.read_csv(os.path.join('../dataset','Full_Features_Occupancy_Estimation.csv'), index_col=0)
-    df_full = pd.concat([df_full, row_in], ignore_index=True)
-    # apply feature engineering
-    log.info("Apply feature engineering")
-    apply_feature_engineering(df_feature_engineering, df_full)
-    # create category time
-    log.info("Create time category")
-    create_category_time(df_full)
-    # apply final cleaning
-    log.info("Apply final cleaning")
-    apply_final_cleaning(df_full)
-    # use model to predict
     log.info("Predicting number people")
-    df_final = pd.read_csv(os.path.join('../dataset','Final_Cleaned_Occupancy_Estimation.csv'),index_col=0)
-    prediction = RF.predict(df_final)
+    prediction = RF.predict(df_in)
     log.info(f"Prediction: {prediction}")
     prediction_list = prediction.tolist()
     return {"prediction": prediction_list}
