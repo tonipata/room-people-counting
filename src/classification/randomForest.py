@@ -25,7 +25,7 @@ model = RandomForestClassifier(n_estimators=50, max_depth=20, min_samples_split=
 
 estimators = [('time discretization', time_transformer),
                ('scaling',MinMaxScaler()),
-               ('pca', PCA(n_components=4)),
+               ('pca', PCA(n_components=0.95)),
                ('rf',model)
             ]
 

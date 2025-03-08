@@ -27,7 +27,7 @@ model = QuadraticDiscriminantAnalysis(reg_param=1e-3)
 
 estimators = [ ('time discretization', time_transformer),
                ('scaling',MinMaxScaler()),
-               ('pca', PCA(n_components=4)),
+               ('pca', PCA(n_components=0.95)),
                ('rf',model)
             ]
 
